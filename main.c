@@ -1,38 +1,34 @@
 #include <stdio.h>
 
-
 typedef struct Registers {
   // common operations registers
-  int rax, rbx, rcx, rdx;
+  int a, b, c, d;
 } Registers;
 
+void print_registers(Registers *regs);
+void reset_registers(Registers *regs);
 
 int main(void) {
   Registers regs;
-  Registers *rp;
 
-  rp = &regs;
-
-  printf("regs: %p\nrp: %p\n", &regs, rp);
-
-  print_registers(regs);
-  //reset_registers(regs);
-  print_registers(regs);
+  print_registers(&regs);
+  reset_registers(&regs);
+  print_registers(&regs);
 
   return 0;
 }
 
-
 void print_registers(Registers *regs) {
-  printf("rax: %x\n", regs->rax);
-  printf("rbx: %x\n", regs->rbx);
-  printf("rcx: %x\n", regs->rcx);
-  printf("rdx: %x\n", regs->rdx);
+  printf("=== Registers: ===\n");
+  printf("a: 0x%x\n", regs->a);
+  printf("b: 0x%x\n", regs->b);
+  printf("c: 0x%x\n", regs->c);
+  printf("d: 0x%x\n", regs->d);
 }
 
 void reset_registers(Registers *regs) {
-  regs->rax = 0;
-  regs->rbx = 0;
-  regs->rcx = 0;
-  regs->rdx = 0;
+  regs->a = 0;
+  regs->b = 0;
+  regs->c = 0;
+  regs->d = 0;
 }
