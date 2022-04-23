@@ -52,8 +52,10 @@ int main(void) {
   // set everything to 0
   reset_registers(&regs);
 
-  emulate(&regs, 0x1110069);
-  emulate(&regs, 0x6110069);
+  // mov a, 0x45
+  emulate(&regs, 0x1100045);
+  // exit(a)
+  emulate(&regs, 0x8000000);
 
   print_registers(&regs);
 
@@ -97,52 +99,24 @@ void set_zero_flag(Registers *regs, int cmp) {
 }
 
 void emulate(Registers *regs, int shellcode) {
-  // TODO: use a struct to map the opcode to the function and call it instead of
-  // a switch
   int opcode = (shellcode & 0xff000000) >> 0x18;
 
-  // the big switch for all the opcodes
-  switch (opcode) {
-  case 0x1:
-    my_mov(regs, shellcode);
-    break;
+  // instructions is an array of pointers of function
+  // each index points to the according function corresponding to the opcode
+  // it is very easy to change the opcode for a certain function
+  void (*instructions[10])(Registers *, int);
+  // no opcode 0 defined for the moment
+  instructions[1] = my_mov;
+  instructions[2] = my_push;
+  instructions[3] = my_add;
+  instructions[4] = my_sub;
+  instructions[5] = my_jmp;
+  instructions[6] = my_cmp;
+  instructions[7] = my_call;
+  instructions[8] = my_exit;
+  instructions[9] = my_pop;
 
-  case 0x2:
-    my_push(regs, shellcode);
-    break;
-
-  case 0x3:
-    my_add(regs, shellcode);
-    break;
-
-  case 0x4:
-    my_sub(regs, shellcode);
-    break;
-
-  case 0x5:
-    my_jmp(regs, shellcode);
-    break;
-
-  case 0x6:
-    my_cmp(regs, shellcode);
-    break;
-
-  case 0x7:
-    my_call(regs, shellcode);
-    break;
-
-  case 0x8:
-    my_exit(regs, shellcode);
-    break;
-
-  case 0x9:
-    my_pop(regs, shellcode);
-    break;
-
-  default:
-    except("OPcode not recognized");
-    break;
-  }
+  (*instructions[opcode])(regs, shellcode);
 }
 
 void my_mov(Registers *regs, int shellcode) {
@@ -216,7 +190,8 @@ void my_sub(Registers *regs, int shellcode) {
 
 void my_jmp(Registers *regs, int shellcode) {}
 void my_call(Registers *regs, int shellcode) {}
-void my_exit(Registers *regs, int shellcode) {}
+
+void my_exit(Registers *regs, int shellcode) { exit(regs->a); }
 
 void my_cmp(Registers *regs, int shellcode) {
   int is_reg1 = (shellcode & 0x00f00000) >> 0x14;
