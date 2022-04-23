@@ -11,14 +11,20 @@ typedef struct Registers {
   // common operations registers
   int a, b, c, d;
 
+  // array to work with when manipulating registers' indexes
+  // each element will point to the address of the correspponding register
+  // see `setup_registers()` for more details
+  int *registers[4];
+
   // opcode holder
   int op;
 
-  // flags
+  // flags are stored in one integer, using masks to extract them
   // remainder, zero (cmp)
   int flags;
 } Registers;
 
+void setup_registers(Registers *regs);
 void print_registers(Registers *regs);
 void reset_registers(Registers *regs);
 void emulate(Registers *regs, int shellcode);
@@ -32,14 +38,17 @@ void my_cmp(Registers *regs, int shellcode);
 void my_push(Registers *regs, int shellcode);
 
 int main(void) {
+  // init the struct
   Registers regs;
+  // setup the registers' array
+  setup_registers(&regs);
 
-  int shellcode = 0x1110069;
-
+  // set everything to 0
   reset_registers(&regs);
+
   print_registers(&regs);
 
-  emulate(&regs, shellcode);
+  emulate(&regs, 0x1110069);
 
   print_registers(&regs);
 
@@ -48,6 +57,14 @@ int main(void) {
   print_registers(&regs);
 
   return 0;
+}
+
+void setup_registers(Registers *regs) {
+  // each element of the array points to the corresponding register's address
+  regs->registers[0] = &regs->a;
+  regs->registers[1] = &regs->b;
+  regs->registers[2] = &regs->c;
+  regs->registers[3] = &regs->d;
 }
 
 void print_registers(Registers *regs) {
@@ -72,6 +89,7 @@ void emulate(Registers *regs, int shellcode) {
   // a switch
   int opcode = (shellcode & 0xff000000) >> 0x18;
 
+  // the big switch for all the opcodes
   switch (opcode) {
   case 0x1:
     my_mov(regs, shellcode);
@@ -124,51 +142,12 @@ void my_mov(Registers *regs, int shellcode) {
     // if source is a register and not a value
     if (is_reg2 == 0x1) {
       int source_reg = value >> 0x8;
-      switch (source_reg) {
-      case 0:
-        value = regs->a;
-        break;
-
-      case 1:
-        value = regs->b;
-        break;
-
-      case 2:
-        value = regs->c;
-        break;
-
-      case 3:
-        value = regs->d;
-        break;
-
-      default:
-        except("Invalid value for mov (arg b is not a valid register)");
-        break;
-      }
+      value = *regs->registers[source_reg];
     }
-    // for the moment, hardcoded values but need to use a struct or something to
-    // make things clearer
-    switch (target_reg) {
-    case 0:
-      regs->a = value;
-      break;
 
-    case 1:
-      regs->b = value;
-      break;
+    // finally, move the value into the register
+    *regs->registers[target_reg] = value;
 
-    case 2:
-      regs->c = value;
-      break;
-
-    case 3:
-      regs->d = value;
-      break;
-
-    default:
-      except("Invalid index of register for mov");
-      break;
-    }
   } else {
     except("Invalid value for mov (arg a is not a register)");
   }
