@@ -1,6 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define TRUE 1
+#define FALSE 0
+#define FLAG_ZERO 0x10000000
+
 #define except(msg)                                                            \
   do {                                                                         \
     perror(msg);                                                               \
@@ -27,6 +31,7 @@ typedef struct Registers {
 void setup_registers(Registers *regs);
 void print_registers(Registers *regs);
 void reset_registers(Registers *regs);
+void set_zero_flag(Registers *regs, int cmp);
 void emulate(Registers *regs, int shellcode);
 void my_mov(Registers *regs, int shellcode);
 void my_add(Registers *regs, int shellcode);
@@ -36,6 +41,7 @@ void my_call(Registers *regs, int shellcode);
 void my_exit(Registers *regs, int shellcode);
 void my_cmp(Registers *regs, int shellcode);
 void my_push(Registers *regs, int shellcode);
+void my_pop(Registers *regs, int shellcode);
 
 int main(void) {
   // init the struct
@@ -46,13 +52,8 @@ int main(void) {
   // set everything to 0
   reset_registers(&regs);
 
-  print_registers(&regs);
-
   emulate(&regs, 0x1110069);
-
-  print_registers(&regs);
-
-  emulate(&regs, 0x1130100);
+  emulate(&regs, 0x6110069);
 
   print_registers(&regs);
 
@@ -82,6 +83,17 @@ void reset_registers(Registers *regs) {
   regs->c = 0;
   regs->d = 0;
   regs->flags = 0;
+}
+
+void set_zero_flag(Registers *regs, int cmp) {
+  if (cmp == TRUE) {
+    regs->flags |= FLAG_ZERO;
+  } else if (cmp == FALSE) {
+    regs->flags |= FLAG_ZERO;
+    regs->flags ^= FLAG_ZERO;
+  } else {
+    except("Invalid valur for set_zero_flag (cmp is neither of TRUE or FALSE)");
+  }
 }
 
 void emulate(Registers *regs, int shellcode) {
@@ -123,6 +135,10 @@ void emulate(Registers *regs, int shellcode) {
     my_exit(regs, shellcode);
     break;
 
+  case 0x9:
+    my_pop(regs, shellcode);
+    break;
+
   default:
     except("OPcode not recognized");
     break;
@@ -131,7 +147,6 @@ void emulate(Registers *regs, int shellcode) {
 
 void my_mov(Registers *regs, int shellcode) {
   int is_reg1 = (shellcode & 0x00f00000) >> 0x14;
-  // mov reg, value
   if (is_reg1 == 0x1) {
     // get index of target reg
     int target_reg = (shellcode & 0x000f0000) >> 0x10;
@@ -153,10 +168,82 @@ void my_mov(Registers *regs, int shellcode) {
   }
 }
 
-void my_add(Registers *regs, int shellcode) {}
-void my_sub(Registers *regs, int shellcode) {}
+void my_add(Registers *regs, int shellcode) {
+  int is_reg1 = (shellcode & 0x00f00000) >> 0x14;
+  if (is_reg1 == 0x1) {
+    // get index of target reg
+    int target_reg = (shellcode & 0x000f0000) >> 0x10;
+    // get value to add
+    int is_reg2 = (shellcode & 0x0000f000) >> 0xc;
+    // get value
+    int value = (shellcode & 0x00000fff);
+    // if source is a register and not a value
+    if (is_reg2 == 0x1) {
+      int source_reg = value >> 0x8;
+      value = *regs->registers[source_reg];
+    }
+
+    // finally, add the value into the register
+    *regs->registers[target_reg] += value;
+
+  } else {
+    except("Invalid value for add (arg a is not a register)");
+  }
+}
+
+void my_sub(Registers *regs, int shellcode) {
+  int is_reg1 = (shellcode & 0x00f00000) >> 0x14;
+  if (is_reg1 == 0x1) {
+    // get index of target reg
+    int target_reg = (shellcode & 0x000f0000) >> 0x10;
+    // get value to sub
+    int is_reg2 = (shellcode & 0x0000f000) >> 0xc;
+    // get value
+    int value = (shellcode & 0x00000fff);
+    // if source is a register and not a value
+    if (is_reg2 == 0x1) {
+      int source_reg = value >> 0x8;
+      value = *regs->registers[source_reg];
+    }
+
+    // finally, sub the value into the register
+    *regs->registers[target_reg] -= value;
+
+  } else {
+    except("Invalid value for sub (arg a is not a register)");
+  }
+}
+
 void my_jmp(Registers *regs, int shellcode) {}
 void my_call(Registers *regs, int shellcode) {}
 void my_exit(Registers *regs, int shellcode) {}
-void my_cmp(Registers *regs, int shellcode) {}
+
+void my_cmp(Registers *regs, int shellcode) {
+  int is_reg1 = (shellcode & 0x00f00000) >> 0x14;
+  if (is_reg1 == 0x1) {
+    // get index of target reg
+    int target_reg = (shellcode & 0x000f0000) >> 0x10;
+    // get value to cmp
+    int is_reg2 = (shellcode & 0x0000f000) >> 0xc;
+    // get cmp value
+    int value = (shellcode & 0x00000fff);
+    // if source is a register and not a value
+    if (is_reg2 == 0x1) {
+      int source_reg = value >> 0x8;
+      value = *regs->registers[source_reg];
+    }
+
+    // finally, cmp the value with the register's and set the flags
+    if (*regs->registers[target_reg] == value) {
+      set_zero_flag(regs, TRUE);
+    } else {
+      set_zero_flag(regs, FALSE);
+    }
+
+  } else {
+    except("Invalid value for mov (arg a is not a register)");
+  }
+}
+
 void my_push(Registers *regs, int shellcode) {}
+void my_pop(Registers *regs, int shellcode) {}
