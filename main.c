@@ -115,6 +115,8 @@ void emulate(Registers *regs, int shellcode) {
   instructions[7] = my_call;
   instructions[8] = my_exit;
   instructions[9] = my_pop;
+  // this is not optimal, as this occurs every time we want to emulate code
+  // one should declare this array once for all for better performance
 
   (*instructions[opcode])(regs, shellcode);
 }
