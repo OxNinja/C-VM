@@ -105,13 +105,14 @@ void my_cmp(Registers *regs, Stack *stack, int shellcode) {
 
 void my_push(Registers *regs, Stack *stack, int shellcode) {
   int value = shellcode & 0x00ffffff;
-  (*stack->stack_pointer = &value;
+  int *pointer = &value;
+  *stack->stack_pointer = pointer;
   stack_inc(stack);
 }
 
 void my_pop(Registers *regs, Stack *stack, int shellcode) {
-  int target_reg = (shellcode & 0x00f00000) >> 0x14;
+  // int target_reg = (shellcode & 0x00f00000) >> 0x14;
   stack_dec(stack);
-  int value = *stack->stack_pointer;
-  regs->registers[target_reg] = value;
+  // int value = *stack->stack_pointer;
+  // regs->registers[target_reg] = value;
 }

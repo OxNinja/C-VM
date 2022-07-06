@@ -24,6 +24,6 @@ void setup_registers(Registers *regs);
 void print_registers(Registers *regs);
 void reset_registers(Registers *regs);
 void set_zero_flag(Registers *regs, int cmp);
-void set_stack_registers(Registers *regs, Stack *stack);
+void setup_stack_registers(Registers *regs, Stack *stack);
 
 #endif

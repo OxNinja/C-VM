@@ -30,8 +30,8 @@ void reset_registers(Registers *regs) {
   regs->flags = 0;
 }
 
-void set_stack_registers(Registers *regs, Stack *stack) {
-  regs->sb = stack->stack;
+void setup_stack_registers(Registers *regs, Stack *stack) {
+  regs->sb = stack->stack_base;
   regs->sp = stack->stack_pointer;
 }
 

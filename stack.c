@@ -6,14 +6,18 @@
 
 void setup_stack(Stack *stack) {
   int stack_size = stack->max_size * STACK_UNIT;
-  stack->stack = (void *) malloc(stack_size);
+  stack->stack = (int *) malloc(stack_size);
+  stack->stack_base = stack->stack;
   stack->stack_end = stack->stack + stack_size;
-  stack->stack_pointer = stack->stack;
+  stack->stack_pointer = &stack->stack;
 }
 
 void print_stack(Stack *stack) {
-  printf("stack start: %p\n", stack->stack);
-  printf("stack end: %p\n", stack->stack_end);
+  printf("--- Stack content ---\n");
+  int stack_size = *stack->stack_pointer - stack->stack;
+  for(int i = 0; i < stack_size; i += STACK_UNIT) {
+    printf("[+0x%04x]: %x\n", i, *(*(stack->stack_pointer + i)));
+  }
 }
 
 void stack_inc(Stack *stack) {

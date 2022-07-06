@@ -13,20 +13,30 @@ int main(void) {
   stack.max_size = 0x100;
   // setup the stack
   setup_stack(&stack);
-  print_stack(&stack);
 
   // init the registers
   Registers regs;
   // setup the registers' array
   setup_registers(&regs);
+  // setup the registers
+  setup_stack_registers(&regs, &stack);
 
   // set everything to 0
   reset_registers(&regs);
 
   // mov a, 0x45
   emulate(&regs, &stack, 0x1100045);
-
   print_registers(&regs);
+
+  // push 0x2b
+  emulate(&regs, &stack, 0x0200002b);
+  print_registers(&regs);
+  print_stack(&stack);
+
+  // pop a
+  emulate(&regs, &stack, 0x09000000);
+  print_registers(&regs);
+  print_stack(&stack);
 
   return 0;
 }

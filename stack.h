@@ -7,8 +7,8 @@ typedef struct Stack {
   // max size of the stack
   int max_size;
 
-  // pointer to the growing stack
-  void *stack, *stack_end, *stack_pointer;
+  // pointers for the stack
+  int *stack, *stack_base, *stack_end, **stack_pointer;
   
 } Stack;
 
