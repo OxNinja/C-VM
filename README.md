@@ -9,11 +9,11 @@ More details on [my blog article](https://0xninja.fr/posts/c-vm/).
 This VM implements the following features:
 
 * [ ] Registers
-    * [ ] Basic registers
+    * [x] Basic registers
     * [ ] Flags
         * [ ] Zero flag 
 * [ ] Stack
-    * [ ] LIFO
+    * [x] LIFO
     * [ ] Max size 
     * [ ] Stackframes
 * [ ] Heap
