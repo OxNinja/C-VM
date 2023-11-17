@@ -1,5 +1,3 @@
-![](https://img.shields.io/github/languages/code-size/oxninja/c-vm)
-
 # C-VM
 
 My try to implement a virtual CPU in C
@@ -11,7 +9,7 @@ This VM implements the following features:
 * [ ] Registers
     * [x] Basic registers
     * [ ] Flags
-        * [ ] Zero flag 
+        * [x] Zero flag 
 * [ ] Stack
     * [x] LIFO
     * [ ] Max size 
@@ -19,18 +17,18 @@ This VM implements the following features:
 * [ ] Heap
     * [ ] Max size
 * [ ] Instructions
-    * [ ] `add reg, val`
-    * [ ] `add reg, reg`
-    * [ ] `sub reg, val`
-    * [ ] `sub reg, reg`
-    * [ ] `cmp reg, val`
-    * [ ] `cmp reg, reg`
-    * [ ] `mov reg, val`
-    * [ ] `mov reg, reg`
+    * [x] `add reg, val`
+    * [x] `add reg, reg`
+    * [x] `sub reg, val`
+    * [x] `sub reg, reg`
+    * [x] `cmp reg, val`
+    * [x] `cmp reg, reg`
+    * [x] `mov reg, val`
+    * [x] `mov reg, reg`
     * [ ] `push val`
     * [ ] `push reg`
     * [ ] `pop reg`
     * [ ] `jmp addr`
     * [ ] `jmp label`
     * [ ] `call func`
-    * [ ] `exit`
+    * [x] `exit`
