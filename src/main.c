@@ -14,9 +14,11 @@ int main(void) {
   registers_print(regs);
 
   // emulate some instructions
+  // push 0xcafeff
   vm_emulate(regs, stack, 0x2cafeff);
   stack_print(stack);
 
+  // pop d
   vm_emulate(regs, stack, 0x9300000);
   stack_print(stack);
   registers_print(regs);

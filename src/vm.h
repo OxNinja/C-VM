@@ -83,7 +83,9 @@ void stack_pop(stack *stack) {
 }
 
 void stack_print(stack *stack) {
+  // stack->last->val = 0xcafeff here
   printf("\n=====\nStack (%p)\nbase: %p\ntop: %p\n", stack, stack->first, stack->last);
+  // FIXME:
   // stack->last->val = 0 here
   stack_node *n = stack->first;
   while(n != NULL) {
